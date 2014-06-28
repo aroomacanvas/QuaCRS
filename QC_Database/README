@@ -1,0 +1,174 @@
+Read Program and QC front end package
+version 1.1
+05/07/2014
+
+CONTENTS OF THIS FILE
+---------------------
+* Introduction
+* Requirements
+* Installation
+* Database Configuration
+* QC Configuration
+* Usage
+* Troubleshooting
+* FAQ
+* Maintainers
+
+INTRODUCTION
+------------
+The first part of this workflow is a wrapper for three popular RNA-Seq quality control tools; RNA-SeQC, RSeQC, and FastQC. It requires an aligned bam file and one or more raw fastq files as input. It also requires a configuration file to be supplied for each sample. Much of the configuration information is optional. Sequencing date, sequencing lane, sample ID, and a study descriptor are all required.
+
+The last part of the workflow summarizes the QC plots and metrics in a database. Users can interact with the data in an interactive, html format. Results can be filtered, explored, and downloaded.
+
+REQUIREMENTS
+------------
+The workflow requires that the 3 QC tools be installed separately.
+* RNA-SeQC (http://www.broadinstitute.org/cancer/cga/rna-seqc)
+* RSeQC (http://rseqc.sourceforge.net/)
+* FastQC (http://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
+
+Other dependencies
+* samtools v0.1.10 or newer (http://sourceforge.net/projects/samtools/files/)
+* picardtools v1.94 or newer (http://sourceforge.net/projects/picard/files/)
+* Reference annotation (gtf & bed), and accompanying fasta
+    This was constructed and tested with gencode 19 (http://www.gencodegenes.org/releases/19.html)
+    Users may use the Galaxy Convert Format tool to convert the gencode gtf to a bed file
+* MySQL database (http://dev.mysql.com/doc/refman/5.6/en/installing.html)
+* Local Server with PHP installed (http://us2.php.net/manual/en/install.php)
+    PHP version 5.1.6 or newer is required
+* python (https://wiki.python.org/moin/BeginnersGuide/Download)
+    MySQLdb module is required
+
+INSTALLATION
+------------
+1) unzip the tar archive containing the bash executable
+2) edit the path configurations file to reflect the installation locations of samtools, picard tools, RNA-SeQC, RSeQC, FastQC, and the references. They can be installed and copied anywhere, as long as the full path is supplied here.
+3) Copy the 'qc' folder where your localhost is set up (usually /var/www/)
+
+DATABASE CONFIGURATION
+----------------------
+    You should first create a database with the default privileges for this program to use. You can name the database whatever you like. The name of the database will be configured in settings below. If you are not familiar with creating databases, please check http://dev.mysql.com/doc/refman/5.0/en/creating-database.html
+
+
+    READ PROGRAM
+    ------------
+    Open the config.py file in the 'constant' folder. Set your database credentials using DB_HOST, DB_USER, DB_PASS, DB_PORT, and DB_NAME variables.
+    NOTE, DB_PORT is optional
+    NOTE, DB_HOST should be "localhost" if you are using a database setup locally.
+
+
+    In that same file, fill in the `WEB_APP_PATH` variable and set it to where you copied the qc folder. For example, if you copied the 'qc' folder in the root of your localhost folder, you should put "/var/www/qc/" (make sure to include the tailing slash)
+
+
+    WEB (qc folder)
+    ---------------
+    Open the config.php file in qc/application/config folder. In that file, change $config['base_url'] and $config['root'] if they are different from how you set up your localhost.
+    
+    $config['base_url']: Base URL should be absolute, including the protocol. This is the url of project folder; the same address used access the database with an internet browser.
+    $config['root']: Root should be absolute. (make sure to include the tailing slash). This is path to the web folder. This should be identical to WEB_APP_PATH.
+
+    Then open the database.php file in the same folder (application/config). In that file, fill in the database configurations. The variable $db['default'] index 'hostname', 'username', 'password', and 'database' is what needs to be filled out (these fields should be identical to what was setup in the Read Program).
+    If you are having trouble setting up the database configuration, check http://ellislab.com/codeigniter/user-guide/database/configuration.html
+
+QC CONFIGURATION
+----------------
+The QC wrapper is run 1 sample at a time with 1 configuration txt file as an argument. This configuration file must include the following:
+
+FASTQ_FILE= Full file path where the fastq file is located. If this sample is a paired end sequencing sample, supply a comma separated list of paths (no spaces).
+
+BAM_FILE= Full file path where the aligned bam file is located.
+
+SID= Sample Identification, or sample name.
+
+STUDY= Name of a project with which the sample is associated.
+
+DATE= Sequencing date. Can be another important date. Used to uniquely identify multiple runs of the same sample. Left blank only for combined samples*
+
+LN= Sequencing lane. Can be another important identifier. Used to uniquely identify different runs of the same sample. Left blank only for combined samples*
+
+*RUN_DESCRIPTION= Used to identify samples that are combined from more than one sequencing run. If reads come from more than one run, the raw files and aligned files will contain reads from more than one lane and date. Such samples require the following considerations:
+
+    1) The fastq files must be combined before entering this QC workflow.
+   	 For single read experiments, simply concatenate the two runs into a composite fastq file
+   	 For paired end data, concatenate the left mates separately from the right mates to yield two composite fastq files
+	 2) When a sample is combined from multiple flowcell dates, this field must be "COMBINED"
+   	 If not a combined sample, this field can be any string, or empty.
+
+The following configuration fields are optional:
+
+INDEX= 6 base pair barcode sequence used for demultiplexing
+
+RQS= RNA quality score
+
+SEQUENCING_TYPE= PolyA, Exome, Transcriptome, Genome, etc.
+
+FCN= Flowcell number, or number of times the sample has been sequenced.
+
+USAGE
+-----
+Once the sample configuration files are complete, run the wrapper as follows:
+
+bash qcpack.sh configuration.txt
+Multiple samples may be processed in parallel, assuming the hardware will support it.
+
+A QC run will create FastQC, RSeQC, and RNASeQC directories in the working directory. Each of these will contain a directory for the particular sample, with the respective QC outputs. Each sample will also have a unique QC table to be read by the database. This table is a compilation of many QC metrics that will be interesting to summarize in a graphical user interface. Once all samples are finished processing, they are ready to upload to the database.
+
+Assumptions for example purposes:
+    - The result of the QC Pack is stored at ~/Documents/qc_pack/result/
+    - The Read program is stored at ~/Documents/read/ and configured correctly with the database and local server.
+    - The 'qc' folder (WEB) is copied in the root directory of the local server and configured correctly. $config['base_url']='http://localhost/qc/';
+
+Step-by-step execution (FOR MULTIPLE SAMPLES)
+1) Navigate to where the Read program is located: cd ~/Documents/read/
+2) Execute the read program(do not copy the dollar sign): $ python read.py -b ~/Documents/qc_pack/result/ -d '\t' create
+
+-b will give the program the path to where the qc tables are currently stored.
+-d is setting the delimiter for those files. By default the delimiter is ',' (comma).
+
+* If you are having trouble executing the Read program: python read.py --help
+
+You should get at the end how many files were successfully processed or failed.
+
+If you get an error, make sure that the database is setup correctly, and also make sure that the qc tables are located in the directory specified. Also, if you got an error while executing the program, clear the database by executing $ python read.py clear before executing again.
+
+3)If everything went smoothly, you should then be able to open your browser and go to https://localhost/qc/ and be able to see the result.
+
+Step-by-step execution (FOR SINGLE SAMPLE)
+1) Navigate to where the Read program is located: cd ~/Documents/read/
+2) Execute the read program(do not copy the dollar sign): $ python read.py -i ~/Documents/qc_pack/result/<SAMPLE_QC_TABLE.CSV> -d '\t' create
+
+-i will give the program the path to where the qc table for that sample is stored.
+-d is setting the delimiter for those files. By default the delimiter is ',' (comma).
+
+* If you are having trouble executing the Read program: python read.py --help
+
+You should get at the end how many files were successfully processed or failed.
+
+If you get an error, make sure that the database is setup correctly, and also make sure that the qc tables are located in the directory specified. Also, if you got an error while executing the program, clear the database by executing $ python read.py clear before executing again.
+
+3)If everything went smoothly, you should then be able to open your browser and go to https://localhost/qc/ and be able to see the result.
+
+
+TROUBLESHOOTING
+---------------
+
+
+
+FAQ
+---
+1) What are the MySQL warnings for?
+Those warning are due to the fact that there is more digits after the decimal point in the qc tables than what is defined in the database.
+
+
+
+
+MAINTAINERS
+------------
+As of May 5, 2014
+
+Nima Esmaili Mokaram <Nima.EsmailiMokaram@osumc.edu>
+Alex Pelletier <Alex.Pelletier@osumc.edu>
+Karl Kroll <Karl.Kroll@osumc.edu>
+
+
+
