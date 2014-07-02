@@ -40,7 +40,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | path to your installation.
 |
 */
-$config['base_url']	= '';
+$config['base_url']	= 'http://localhost/test/';
 
 /*
 |--------------------------------------------------------------------------
@@ -50,7 +50,7 @@ $config['base_url']	= '';
 | This variable will have the root location of this project.
 |
 */
-$config['root'] = '';
+$config['root'] = '/var/www/test/';
 
 /*
 |--------------------------------------------------------------------------|
@@ -309,7 +309,7 @@ $config['cache_path'] = '';
 | http://codeigniter.com/user_guide/libraries/sessions.html
 |
 */
-$config['encryption_key'] = '';
+$config['encryption_key'] = '48792398432569986528907417904';
 
 /*
 |--------------------------------------------------------------------------

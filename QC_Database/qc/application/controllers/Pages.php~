@@ -16,11 +16,11 @@ class Pages extends CI_Controller {
     		  $sdata['username'] = $session_data['username'];
     		  //echo $sdata['username'];
     		}
-    		else
+    	else
     		{
     		  //If no session, redirect to login page
     		  redirect('login', 'refresh');
-		}
+			}
 
 		$head['title'] = ucwords($page);
 		$navbar['selected']=$page;

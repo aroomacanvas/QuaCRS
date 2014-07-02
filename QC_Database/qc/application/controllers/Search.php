@@ -15,6 +15,17 @@ class Search extends CI_Controller{
     }
 
     public function index($keyword){
+    		if($this->session->userdata('logged_in'))
+    			{
+    			  $session_data = $this->session->userdata('logged_in');
+    			  $sdata['username'] = $session_data['username'];
+    			  //echo $sdata['username'];
+    			}
+    		else
+    			{
+    			  //If no session, redirect to login page
+    			  redirect('login', 'refresh');
+				}
     	
     	$this->load->helper('form');
 

@@ -10,7 +10,18 @@ class Login extends CI_Controller {
   function index()
   {
     $this->load->helper('form');
-    $this->load->view('login_view');
+	if($this->session->userdata('logged_in'))
+    	{
+    	  $session_data = $this->session->userdata('logged_in');
+    	  $sdata['username'] = $session_data['username'];
+    	  redirect('sample', 'refresh');
+    	  //echo $sdata['username'];
+    	}
+    else
+    	{
+    	  //If no session, redirect to login page
+    	  $this->load->view('pages/login_view');
+		}    
   }
 
 }

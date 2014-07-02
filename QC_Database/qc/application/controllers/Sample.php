@@ -14,6 +14,18 @@ class Sample extends CI_Controller{
 
 
 	public function index(){
+
+		if($this->session->userdata('logged_in'))
+    		{
+    		  $session_data = $this->session->userdata('logged_in');
+    		  $sdata['username'] = $session_data['username'];
+    		  //echo $sdata['username'];
+    		}
+    	else
+    		{
+    		  //If no session, redirect to login page
+    		  redirect('login', 'refresh');
+			}
 		
 		$samples = $this->Sample_model->get_all_samples("*",true);
 		//$columns = $this->Sample_model->get_columns("qc");
