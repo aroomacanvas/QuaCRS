@@ -15,18 +15,16 @@ class Search extends CI_Controller{
     }
 
     public function index($keyword){
-    		if($this->session->userdata('logged_in'))
-    			{
-    			  $session_data = $this->session->userdata('logged_in');
-    			  $sdata['username'] = $session_data['username'];
-    			  //echo $sdata['username'];
-    			}
-    		else
-    			{
-    			  //If no session, redirect to login page
-    			  redirect('login', 'refresh');
-				}
-    	
+    	if($this->session->userdata('logged_in')){
+    		$session_data = $this->session->userdata('logged_in');
+    		$sdata['username'] = $session_data['username'];
+    		//echo $sdata['username'];
+    	}
+    	else{
+    		//If no session, redirect to login page
+    		redirect('login', 'refresh');
+	}
+
     	$this->load->helper('form');
 
 		// since we are going to be using the columns from the views in the columns dropdown,
@@ -45,13 +43,21 @@ class Search extends CI_Controller{
 				$columns[] = $column;
 			}
 		}
-		
 		$data['defaultColumns'] = get_column_order();
 		foreach($data['defaultColumns'] as $ind){
 			$columnNames[$columns[$ind]['Field']] = $columns[$ind]['Field'] ;
 		}
 
-		$samples = $this->Sample_model->search_samples($columnNames, $keyword);
+		#Check for column specification
+		$keyword_exploded = explode(":", $keyword);
+		if(sizeof($keyword_exploded) >= 2){
+			$newKeyword = trim($keyword_exploded[1]);
+			$searchColumn = str_replace(" ", "_", trim($keyword_exploded[0]));
+			$samples = $this->Sample_model->search_column($columnNames, $newKeyword, $searchColumn);
+		}
+		else{
+			$samples = $this->Sample_model->search_samples($columnNames, $keyword);
+		}
 
 		$head['title'] = "Searching for $keyword";
 		$navbar['selected']="home";

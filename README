@@ -3,6 +3,7 @@
  | | | | | | |/ _` | |   | |_) \___ \ 
  | |_| | |_| | (_| | |___|  _ < ___) |
   \__\_\\__,_|\__,_|\____|_| \_\____/ 
+		Quality Control for RNA-Seq
                                     
                    ___
                  .'   '.__
@@ -14,9 +15,8 @@
           '. '-._     /
    ``^^`^`^`^^`^^^``^`^``^``^^^
 
-
 The Ohio State University Wexner Medical Center
-Version 1.1
+QuaCRS v1.1
 6/27/2014
 
 TABLE OF CONTENTS 
@@ -40,35 +40,38 @@ INTRODUCTION
 VERSION HISTORY
 ----------------
 QuaCRS v1.1 (Released 6/27/14)
-       * Added Readme page
-       * Removed highlighting on searches
-       * Fixed PHP error when attempting to create an aggregate report of 0 samples
-       * Added 'Sequencing date' column
+* Added Readme page
+* Removed highlighting on searches
+* Fixed PHP error when attempting to create an aggregate report of 0 samples
+* Added 'Sequencing date' column
 
 QuaCRS v1.0 (Released 5/29/14)
-       * Initial release
+* Initial release
 
 REQUIREMENTS
 ----------------
-QC tools
+QC Tools
 * RNA-SeQC (http://www.broadinstitute.org/cancer/cga/rna-seqc)
 * RSeQC (http://rseqc.sourceforge.net/)
 * FastQC (http://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
 
-Other dependencies
-* samtools v0.1.10 or newer (http://sourceforge.net/projects/samtools/files/)
-* picardtools v1.94 or newer (http://sourceforge.net/projects/picard/files/)
-* Reference annotation (GTF & BED), and accompanying FASTA file
-	Tested with Gencode 19 (http://www.gencodegenes.org/releases/19.html)
-	Users may use the Galaxy Convert Format tool to convert the Gencode GTF to a BED file (https://usegalaxy.org/)
+Software Dependencies
+* SAMtools v0.1.10 or newer (http://sourceforge.net/projects/samtools/files/)
+* Picard Tools v1.94 or newer (http://sourceforge.net/projects/picard/files/)
+* Python (https://wiki.python.org/moin/BeginnersGuide/Download)
+	MySQLdb module
+	python-dev
+* NumPy (http://www.numpy.org/)
+* ncurses (http://www.gnu.org/software/ncurses/)
+* ImageMagic convert (http://www.imagemagick.org/script/convert.php)
 * MySQL database (http://dev.mysql.com/doc/refman/5.6/en/installing.html)
 * Local Server with PHP installed (http://us2.php.net/manual/en/install.php)
 	PHP version 5.1.6 or newer
-* python (https://wiki.python.org/moin/BeginnersGuide/Download)
-	MySQLdb module
-* python-dev
-* ncurses
-* ImageMagic convert (http://www.imagemagick.org/script/convert.php)
+
+References
+* Reference annotation (GTF & BED), and accompanying FASTA file with index
+	Tested with Gencode 19 (http://www.gencodegenes.org/releases/19.html)
+	Users may use the Galaxy Convert Format tool to convert the Gencode GTF to a BED file (https://usegalaxy.org/)
 
 INSTALLATION
 ----------------
@@ -180,13 +183,13 @@ TROUBLESHOOTING
 ----------------
 1) What are the MySQL warnings for?
 	These warnings indicate that the QC tables contain more significant digits than what is defined in the database.
+
 2) Why does RSeQC return so many errors regarding my reference file?
 	Using the Galaxy Convert Format tool to convert the Gencode GTF file to BED format will loosely translate many GTF lines into incomplete BED entries. This doesn't prevent RSeQC from running successfully, but may result in large amounts of warning messages. Removing the truncated lines from the BED file should fix this problem.
 
 MAINTAINERS
 ----------------
-As of 5/28/2014:
-	Nima Esmaili Mokaram - esmailimokaram.1@buckeyemail.osu.edu	
-	Karl Kroll - Karl.Kroll@osumc.edu
-	Alex Pelletier - Alex.Pelletier@osumc.edu
+Nima Esmaili Mokaram - esmailimokaram.1@buckeyemail.osu.edu	
+Karl Kroll - Karl.Kroll@osumc.edu
+Alex Pelletier - Alex.Pelletier@osumc.edu
 

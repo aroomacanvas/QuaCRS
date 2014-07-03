@@ -169,5 +169,52 @@ class Sample_model extends CI_Model {
 
 		return $result;
 	}
+
+	function search_column($columnNames, $keyword, $searchColumn){
+		$allColumns = $this->get_columns("qc");
+		$selectedColumns = array();
+		$isNumber = is_numeric($keyword);
+
+		foreach($allColumns as $column){
+			if(isset($columnNames[$column['Field']])){
+				if(strtolower($columnNames[$column['Field']]) == strtolower($searchColumn)){
+					if(!$isNumber && (strpos($column['Type'], "int") === false && strpos($column['Type'], "decimal") === false  && strpos($column['Type'], "float") === false)){
+						$selectedColumns[$column['Field']] = array($column['Field'], $column['Type']);
+					}
+					elseif($isNumber){
+						$selectedColumns[$column['Field']] = array($column['Field'], $column['Type']);
+					}
+				}
+			}
+		}
+		$where = "";
+
+		if(sizeof($selectedColumns) == 0){
+			$base_url = $this->config->item('base_url');
+			echo "<script type='text/javascript'>alert('Invalid column name for search!'); window.location.replace('$base_url');</script>";
+			return null;
+		}
+		else{
+			foreach($selectedColumns as $column){
+				# The type the column is a number
+				if(strpos($column[1], "int") !== false || strpos($column[1], "decimal") !== false  || strpos($column[1], "float") !== false ){
+					$where .= "`".$column[0]."`" . " = " . $keyword. " OR ";
+				}
+				
+				# The type the column is not a number
+				else{
+					$where .= "`".$column[0]."`" . " LIKE '" . $keyword. "' OR ";
+					#$where .= "`".$column[0]."`" . " LIKE '%" . $keyword. "%' OR ";
+				}
+			}
+			$where = rtrim($where, "OR ");
+			#echo $where;
+			$this->db->where($where);
+			$query = $this->db->get("qc");
+			$result = $query->result_array();
+
+			return $result;
+		}
+	}
 }
 ?>
